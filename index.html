@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Software Hub — Login (Fixed Mobile)</title>
+  <style>
+    :root{
+      --bg1: #071227;
+      --bg2: #08102a;
+      --card: rgba(255,255,255,0.04);
+      --accent-grad: linear-gradient(90deg,#6ee7b7,#60a5fa,#a78bfa);
+      --text: #e6eef8;
+      --muted: #9fb0d6;
+      --danger: #ef4444;
+      --max-width: 1100px;
+    }
+    *{box-sizing:border-box;font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    html,body{height:100%;margin:0;background:
+      radial-gradient(800px 400px at 10% 20%, rgba(124,58,237,0.06), transparent 8%),
+      radial-gradient(600px 300px at 90% 80%, rgba(59,130,246,0.03), transparent 8%),
+      linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:var(--text);-webkit-font-smoothing:antialiased;}
+    /* Layout */
+    header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;max-width:var(--max-width);margin:0 auto}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:44px;height:44px;border-radius:10px;background:var(--accent-grad);display:grid;place-items:center;color:#052033;font-weight:700}
+    .container{padding:18px 20px;max-width:var(--max-width);margin:0 auto}
+    .welcome{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .welcome .left h2{margin:0;font-size:20px}
+    .welcome .left p{margin:4px 0 0;color:var(--muted);font-size:13px}
+
+    /* Grid & cards */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.03);
+      padding:14px;border-radius:12px;backdrop-filter: blur(6px);position:relative;overflow:hidden;
+    }
+    /* Only apply hover lift on non-touch large screens */
+    @media (hover:hover) and (min-width:641px){
+      .card{transition:transform .28s ease, box-shadow .28s ease;}
+      .card:hover{transform:translateY(-6px);box-shadow:0 16px 36px rgba(2,6,23,0.5)}
+    }
+    .title{display:flex;gap:12px;align-items:center}
+    .thumb{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#1e293b,#0ea5e9);display:grid;place-items:center;font-weight:700;font-size:14px}
+    .card h3{margin:0;font-size:16px}
+    .meta{color:var(--muted);font-size:13px;margin-top:6px}
+
+    .actions{display:flex;gap:8px;margin-top:12px;align-items:center}
+    .btn{border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+      background:linear-gradient(90deg,#0284c7,#7c3aed);color:white;text-decoration:none;box-shadow:0 8px 18px rgba(2,6,23,0.45)}
+    .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text)}
+    .small{padding:8px 10px;border-radius:8px;font-size:13px}
+    .muted{color:var(--muted);font-size:13px}
+
+    /* zip hint */
+    .zip-hint{display:flex;gap:10px;align-items:center;background:rgba(255,255,255,0.02);padding:8px;border-radius:9px;border:1px solid rgba(255,255,255,0.03)}
+
+    /* Login overlay */
+    .overlay{position:fixed;inset:0;display:grid;place-items:center;z-index:9999;pointer-events:auto}
+    .overlay__backdrop{position:absolute;inset:0;background:rgba(2,6,23,0.82);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+    .login-card{
+      width:420px;max-width:92%;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border-radius:14px;padding:20px;border:1px solid rgba(255,255,255,0.06);box-shadow:0 20px 60px rgba(2,6,23,0.75);
+      position:relative;z-index:2;transform:translateY(0);
+    }
+    .login-card h2{margin:0 0 6px 0}
+    .login-card p{margin:0 0 14px 0;color:var(--muted)}
+    .field{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+    input[type="text"], input[type="password"]{padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text);outline:none}
+    .actions-row{display:flex;gap:10px;align-items:center;margin-top:6px}
+    .hint{font-size:13px;color:var(--muted)}
+    .error{color:var(--danger);font-size:13px;margin-top:8px;display:none}
+
+    /* Toasts */
+    .toast{position:fixed;right:18px;bottom:18px;padding:10px 14px;border-radius:10px;color:white;box-shadow:0 10px 30px rgba(2,6,23,0.6);z-index:11000}
+    .toast.error{background:rgba(239,68,68,0.95)}
+    .toast.info{background:rgba(2,132,199,0.95)}
+
+    /* hidden state */
+    .is-hidden{opacity:0;pointer-events:none;visibility:hidden}
+    .is-visible{opacity:1;pointer-events:auto;visibility:visible}
+
+    /* responsive tweaks */
+    @media (max-width:640px){
+      header{padding:10px}
+      .login-card{padding:16px;width:92%}
+      .brand h1{font-size:16px}
+      .welcome .left h2{font-size:18px}
+      .muted{font-size:12px}
+      .card h3{font-size:15px}
+      .thumb{width:44px;height:44px}
+      /* reduce background noise on small screens */
+      html,body{background:
+        linear-gradient(180deg,#071227,#08102a);}
+    }
+
+    /* accessibility: reduce motion */
+    @media (prefers-reduced-motion: reduce){
+      .card, .login-card{transition:none}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="20" height="20" rx="5" fill="white" opacity="0.12"/><path d="M6 12h12M12 6v12" stroke="#072044" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <h1 style="margin:0;font-size:18px">Software Hub</h1>
+        <div style="font-size:12px;color:var(--muted)">Secure downloads — demo UI</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="zip-hint">
+        <strong style="font-size:13px">ZIP password:</strong>
+        <span id="zip-pass" style="font-weight:700">123</span>
+        <button id="copyZip" class="small" style="background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px;border-radius:8px;color:var(--text);cursor:pointer">Copy</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="app">
+    <div class="welcome">
+      <div class="left">
+        <h2>Welcome to the Software Download Center</h2>
+        <p>Sign in to access installers. (Demo credentials below)</p>
+      </div>
+      <div></div>
+    </div>
+
+    <section class="grid" id="softwareGrid" aria-live="polite">
+      <!-- JS populates -->
+    </section>
+
+    <footer style="margin-top:22px;color:var(--muted);font-size:13px;padding-bottom:28px;text-align:center">
+      Made with ♥ — edit links & credentials in the HTML file.
+    </footer>
+  </main>
+
+  <!-- Overlay -->
+  <div id="loginOverlay" class="overlay is-visible" role="dialog" aria-modal="true" aria-label="Login dialog">
+    <div class="overlay__backdrop" id="overlayBackdrop"></div>
+
+    <div class="login-card" id="loginCard">
+      <h2>Sign in to continue</h2>
+      <p>Enter your credentials to access the Software Hub dashboard.</p>
+
+      <div class="field">
+        <label class="hint">Username</label>
+        <input id="username" type="text" placeholder="admin" autocomplete="username" />
+      </div>
+
+      <div class="field">
+        <label class="hint">Password</label>
+        <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+
+      <div class="actions-row">
+        <button id="loginBtn" class="btn">Sign in</button>
+        <button id="demoBtn" class="btn secondary small">Demo credentials</button>
+        <div style="margin-left:auto;font-size:13px;color:var(--muted)">Need help? Contact admin</div>
+      </div>
+
+      <div class="error" id="loginError">Invalid username or password.</div>
+
+      <p class="hint" style="margin-top:12px;color:var(--muted)">Demo credentials: <strong>admin / admin123</strong></p>
+    </div>
+  </div>
+
+  <script>
+    /**********************
+     * Config
+     **********************/
+    const DEMO_USERNAME = 'admin';
+    const DEMO_PASSWORD = 'admin123';
+    const DRIVE_FOLDER = 'https://drive.google.com/drive/folders/1CmLK4C1Z6iYKeYifMZ1p2G5c3dC_q3WL';
+
+    const softwareList = [
+      { title: 'Adobe Premiere Pro — 2025', subtitle: 'Full installer (zip protected)', url: DRIVE_FOLDER },
+      { title: 'Adobe Premiere Pro — 2022', subtitle: 'Full installer (zip protected)', url: DRIVE_FOLDER },
+      { title: 'Adobe After Effects — 2025', subtitle: 'Full installer (zip protected)', url: DRIVE_FOLDER },
+      { title: 'Adobe After Effects — 2022', subtitle: 'Full installer (zip protected)', url: DRIVE_FOLDER },
+    ];
+
+    /**********************
+     * Render
+     **********************/
+    const grid = document.getElementById('softwareGrid');
+    softwareList.forEach((s, idx) => {
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="title">
+          <div class="thumb" aria-hidden>${s.title.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+          <div>
+            <h3>${s.title}</h3>
+            <div class="meta">${s.subtitle}</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <a class="btn" target="_blank" rel="noopener noreferrer" href="${s.url}" title="Open download location">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" style="margin-right:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </a>
+
+          <button class="btn secondary small" type="button" data-info-index="${idx}" aria-label="Details for ${s.title}">Details</button>
+          <div class="muted" style="margin-left:auto;font-size:13px">Size: varies</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // details click
+    grid.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button[data-info-index]');
+      if(!btn) return;
+      const i = Number(btn.getAttribute('data-info-index'));
+      const s = softwareList[i];
+      alert(`${s.title}\n\nNote: Clicking 'Download' opens the provided Drive folder.\n\nZIP Password: 123`);
+    });
+
+    /**********************
+     * Login behavior
+     **********************/
+    const overlay = document.getElementById('loginOverlay');
+    const overlayBackdrop = document.getElementById('overlayBackdrop');
+    const loginBtn = document.getElementById('loginBtn');
+    const demoBtn = document.getElementById('demoBtn');
+    const usernameField = document.getElementById('username');
+    const passwordField = document.getElementById('password');
+    const loginError = document.getElementById('loginError');
+
+    // lock page scroll when overlay visible
+    function lockBodyScroll(lock){
+      if(lock){
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+      }
+    }
+
+    function showOverlay(){
+      overlay.classList.remove('is-hidden');
+      overlay.classList.add('is-visible');
+      overlay.setAttribute('aria-hidden','false');
+      lockBodyScroll(true);
+    }
+    function hideOverlay(){
+      overlay.classList.remove('is-visible');
+      overlay.classList.add('is-hidden');
+      overlay.setAttribute('aria-hidden','true');
+      lockBodyScroll(false);
+    }
+
+    // initialize: overlay visible by default
+    showOverlay();
+
+    demoBtn.addEventListener('click', ()=>{
+      usernameField.value = DEMO_USERNAME;
+      passwordField.value = DEMO_PASSWORD;
+    });
+
+    function attemptLogin(){
+      const u = usernameField.value.trim();
+      const p = passwordField.value.trim();
+      if(u === DEMO_USERNAME && p === DEMO_PASSWORD){
+        loginError.style.display = 'none';
+        // hide overlay
+        hideOverlay();
+        showToast('Welcome — you are signed in.', false);
+        // focus first download button for keyboard users
+        const firstDownload = document.querySelector('.card a.btn');
+        if(firstDownload) firstDownload.focus();
+      } else {
+        loginError.style.display = 'block';
+        showToast('Login failed — check credentials.', true);
+      }
+    }
+
+    loginBtn.addEventListener('click', attemptLogin);
+    passwordField.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') attemptLogin(); });
+    usernameField.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') attemptLogin(); });
+
+    // clicking backdrop does NOT dismiss overlay to avoid accidental close on mobile.
+    overlayBackdrop.addEventListener('click', ()=>{ /* no-op */ });
+
+    /**********************
+     * Copy ZIP password
+     **********************/
+    document.getElementById('copyZip').addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText('123');
+        showToast('ZIP password copied to clipboard.', false);
+      }catch(e){
+        showToast('Unable to copy (browser prevented clipboard). Password: 123', true);
+      }
+    });
+
+    /**********************
+     * Toast
+     **********************/
+    function showToast(msg, isError=false){
+      const t = document.createElement('div');
+      t.className = 'toast ' + (isError ? 'error' : 'info');
+      t.textContent = msg;
+      // Ensure toasts appear above everything except the overlay (overlay intentionally high z-index)
+      t.style.zIndex = isError ? 11001 : 11000;
+      document.body.appendChild(t);
+      setTimeout(()=>{ t.style.transition='opacity .35s'; t.style.opacity='0'; setTimeout(()=>t.remove(),400); }, 2400);
+    }
+
+    // Accessibility: focus handling
+    // Keep focus inside login when visible (simple trap)
+    document.addEventListener('focusin', (e)=>{
+      if(overlay.classList.contains('is-visible')){
+        // if focus goes outside overlay, bring it back to username
+        if(!overlay.contains(e.target)){
+          usernameField.focus();
+        }
+      }
+    });
+
+    // End of script
+  </script>
+</body>
+</html>
