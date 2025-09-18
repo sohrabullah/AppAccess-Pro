@@ -37,7 +37,6 @@
       border:1px solid rgba(255,255,255,0.03);
       padding:14px;border-radius:12px;backdrop-filter: blur(6px);position:relative;overflow:hidden;
     }
-    /* Only apply hover lift on non-touch large screens */
     @media (hover:hover) and (min-width:641px){
       .card{transition:transform .28s ease, box-shadow .28s ease;}
       .card:hover{transform:translateY(-6px);box-shadow:0 16px 36px rgba(2,6,23,0.5)}
@@ -54,7 +53,6 @@
     .small{padding:8px 10px;border-radius:8px;font-size:13px}
     .muted{color:var(--muted);font-size:13px}
 
-    /* zip hint */
     .zip-hint{display:flex;gap:10px;align-items:center;background:rgba(255,255,255,0.02);padding:8px;border-radius:9px;border:1px solid rgba(255,255,255,0.03)}
 
     /* Login overlay */
@@ -78,11 +76,9 @@
     .toast.error{background:rgba(239,68,68,0.95)}
     .toast.info{background:rgba(2,132,199,0.95)}
 
-    /* hidden state */
     .is-hidden{opacity:0;pointer-events:none;visibility:hidden}
     .is-visible{opacity:1;pointer-events:auto;visibility:visible}
 
-    /* responsive tweaks */
     @media (max-width:640px){
       header{padding:10px}
       .login-card{padding:16px;width:92%}
@@ -91,12 +87,8 @@
       .muted{font-size:12px}
       .card h3{font-size:15px}
       .thumb{width:44px;height:44px}
-      /* reduce background noise on small screens */
-      html,body{background:
-        linear-gradient(180deg,#071227,#08102a);}
+      html,body{background:linear-gradient(180deg,#071227,#08102a);}
     }
-
-    /* accessibility: reduce motion */
     @media (prefers-reduced-motion: reduce){
       .card, .login-card{transition:none}
     }
@@ -172,23 +164,32 @@
   </div>
 
   <script>
-    /**********************
-     * Config
-     **********************/
     const DEMO_USERNAME = 'admin';
     const DEMO_PASSWORD = 'admin123';
-    const DRIVE_FOLDER = 'https://drive.google.com/drive/folders/1CmLK4C1Z6iYKeYifMZ1p2G5c3dC_q3WL';
 
     const softwareList = [
-      { title: 'Adobe Premiere Pro — 2025', subtitle: 'Full installer (zip protected)', url: DRIVE_FOLDER },
-      { title: 'Adobe Premiere Pro — 2022', subtitle: 'Full installer (zip protected)', url: DRIVE_FOLDER },
-      { title: 'Adobe After Effects — 2025', subtitle: 'Full installer (zip protected)', url: DRIVE_FOLDER },
-      { title: 'Adobe After Effects — 2022', subtitle: 'Full installer (zip protected)', url: DRIVE_FOLDER },
+      { 
+        title: 'Adobe After Effects — 2022', 
+        subtitle: 'Full installer (zip protected)', 
+        url: 'https://drive.google.com/file/d/16dqn-Tu0OpRy6F3k6l3_YEAfOJCGQEYr/view' 
+      },
+      { 
+        title: 'Adobe After Effects — 2025', 
+        subtitle: 'Full installer (zip protected)', 
+        url: 'https://drive.google.com/file/d/1K9sCjofw2CqtAoUgLIGoImk6D6hS8dTu/view' 
+      },
+      { 
+        title: 'Adobe Premiere Pro — 2022', 
+        subtitle: 'Full installer (zip protected)', 
+        url: 'https://drive.google.com/file/d/1vIolg9f8uTfFOOjEVqfPp_SLCJ0EM2Sw/view' 
+      },
+      { 
+        title: 'Adobe Premiere Pro — 2025', 
+        subtitle: 'Full installer (zip protected)', 
+        url: 'https://drive.google.com/file/d/1VhI5F_n9xLHTQKX_DzVNWEnqzEwMnf2F/view' 
+      },
     ];
 
-    /**********************
-     * Render
-     **********************/
     const grid = document.getElementById('softwareGrid');
     softwareList.forEach((s, idx) => {
       const card = document.createElement('article');
@@ -204,10 +205,8 @@
 
         <div class="actions">
           <a class="btn" target="_blank" rel="noopener noreferrer" href="${s.url}" title="Open download location">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" style="margin-right:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Download
           </a>
-
           <button class="btn secondary small" type="button" data-info-index="${idx}" aria-label="Details for ${s.title}">Details</button>
           <div class="muted" style="margin-left:auto;font-size:13px">Size: varies</div>
         </div>
@@ -215,27 +214,21 @@
       grid.appendChild(card);
     });
 
-    // details click
     grid.addEventListener('click', (e)=>{
       const btn = e.target.closest('button[data-info-index]');
       if(!btn) return;
       const i = Number(btn.getAttribute('data-info-index'));
       const s = softwareList[i];
-      alert(`${s.title}\n\nNote: Clicking 'Download' opens the provided Drive folder.\n\nZIP Password: 123`);
+      alert(`${s.title}\n\nNote: Clicking 'Download' opens the provided Drive file.\n\nZIP Password: 123`);
     });
 
-    /**********************
-     * Login behavior
-     **********************/
     const overlay = document.getElementById('loginOverlay');
-    const overlayBackdrop = document.getElementById('overlayBackdrop');
     const loginBtn = document.getElementById('loginBtn');
     const demoBtn = document.getElementById('demoBtn');
     const usernameField = document.getElementById('username');
     const passwordField = document.getElementById('password');
     const loginError = document.getElementById('loginError');
 
-    // lock page scroll when overlay visible
     function lockBodyScroll(lock){
       if(lock){
         document.documentElement.style.overflow = 'hidden';
@@ -245,21 +238,16 @@
         document.body.style.overflow = '';
       }
     }
-
     function showOverlay(){
       overlay.classList.remove('is-hidden');
       overlay.classList.add('is-visible');
-      overlay.setAttribute('aria-hidden','false');
       lockBodyScroll(true);
     }
     function hideOverlay(){
       overlay.classList.remove('is-visible');
       overlay.classList.add('is-hidden');
-      overlay.setAttribute('aria-hidden','true');
       lockBodyScroll(false);
     }
-
-    // initialize: overlay visible by default
     showOverlay();
 
     demoBtn.addEventListener('click', ()=>{
@@ -272,62 +260,23 @@
       const p = passwordField.value.trim();
       if(u === DEMO_USERNAME && p === DEMO_PASSWORD){
         loginError.style.display = 'none';
-        // hide overlay
         hideOverlay();
-        showToast('Welcome — you are signed in.', false);
-        // focus first download button for keyboard users
-        const firstDownload = document.querySelector('.card a.btn');
-        if(firstDownload) firstDownload.focus();
       } else {
         loginError.style.display = 'block';
-        showToast('Login failed — check credentials.', true);
       }
     }
-
     loginBtn.addEventListener('click', attemptLogin);
     passwordField.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') attemptLogin(); });
     usernameField.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') attemptLogin(); });
 
-    // clicking backdrop does NOT dismiss overlay to avoid accidental close on mobile.
-    overlayBackdrop.addEventListener('click', ()=>{ /* no-op */ });
-
-    /**********************
-     * Copy ZIP password
-     **********************/
     document.getElementById('copyZip').addEventListener('click', async ()=>{
       try{
         await navigator.clipboard.writeText('123');
-        showToast('ZIP password copied to clipboard.', false);
+        alert('ZIP password copied: 123');
       }catch(e){
-        showToast('Unable to copy (browser prevented clipboard). Password: 123', true);
+        alert('Unable to copy. Password: 123');
       }
     });
-
-    /**********************
-     * Toast
-     **********************/
-    function showToast(msg, isError=false){
-      const t = document.createElement('div');
-      t.className = 'toast ' + (isError ? 'error' : 'info');
-      t.textContent = msg;
-      // Ensure toasts appear above everything except the overlay (overlay intentionally high z-index)
-      t.style.zIndex = isError ? 11001 : 11000;
-      document.body.appendChild(t);
-      setTimeout(()=>{ t.style.transition='opacity .35s'; t.style.opacity='0'; setTimeout(()=>t.remove(),400); }, 2400);
-    }
-
-    // Accessibility: focus handling
-    // Keep focus inside login when visible (simple trap)
-    document.addEventListener('focusin', (e)=>{
-      if(overlay.classList.contains('is-visible')){
-        // if focus goes outside overlay, bring it back to username
-        if(!overlay.contains(e.target)){
-          usernameField.focus();
-        }
-      }
-    });
-
-    // End of script
   </script>
 </body>
 </html>
